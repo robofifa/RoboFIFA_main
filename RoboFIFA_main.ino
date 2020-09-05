@@ -16,17 +16,20 @@ const int resolution = 8; // 1-16 bits
 const int max_power = 100;
 const int min_power = -100;
 
-const char* server_ip = "192.168.43.12";
+const char* server_ip = "192.168.43.128";
 
 // Vars for the Encoders
 Encoder *Left;
-const uint8_t CHAN_A = 16;
-const uint8_t CHAN_B = 17;
+Encoder *Right;
+const uint8_t L_CHAN_A = 16;
+const uint8_t L_CHAN_B = 17;
+const uint8_t R_CHAN_A = 21;
+const uint8_t R_CHAN_B = 22;
 const unsigned int FILTERLENGTH = 1023; 
 
 RoboFIFA_communication com(server_ip);
-MX1508 M1(M1A, M1B, freq, ledChannel1, resolution);
-MX1508 M2(M2A, M2B, freq, ledChannel2, resolution);
+MX1508 M1(M1A, M1B, freq, ledChannel2, resolution);
+MX1508 M2(M2A, M2B, freq, ledChannel1, resolution);
 
 void callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
@@ -51,7 +54,8 @@ void setup() {
   com.setup_mqtt(callback);
   M1.init();
   M2.init();
-  Left = new Encoder(PCNT_UNIT_0, CHAN_A, CHAN_B, Encoding::X4, FILTERLENGTH);
+  Left = new Encoder(PCNT_UNIT_0, L_CHAN_A, L_CHAN_B, Encoding::X4, FILTERLENGTH);
+  Right = new Encoder(PCNT_UNIT_1, L_CHAN_A, L_CHAN_B, Encoding::X4, FILTERLENGTH);
 }
 
 
@@ -75,6 +79,9 @@ void loop() {
   }
   if(count < (millis() - 100)){
     count = millis();
+    Serial.print("Left ");
     Serial.println(Left->ReadAndReset());
+    Serial.print("Right ");
+    Serial.println(Right->ReadAndReset());
   }
 }
